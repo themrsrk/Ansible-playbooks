@@ -1,0 +1,33 @@
+---
+- name: Install NVM and Node.js
+  hosts: aws
+  become: true
+  
+  tasks:
+#  - name: Install dependencies
+#    apt: name={{ item }} state=installed
+#    with_items:
+#      - build-essential
+#      - libssl-dev
+#      - curl
+
+  - name: Install NVM
+    shell: curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+    args:
+      creates: /root/.nvm/nvm.sh
+
+  - name: Source NVM
+    shell: source /root/.nvm/nvm.sh
+    args:
+      executable: /bin/bash
+
+  - name: Install Node.js 16.12
+    shell: nvm install 16.12
+    args:
+      executable: /bin/bash
+      creates: /root/.nvm/versions/node/v16.12.0/bin/node
+
+#  - name: Set default Node.js version
+#    shell: nvm alias default 16.12
+#    args:
+#      executable: /bin/bash

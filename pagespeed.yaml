@@ -1,0 +1,140 @@
+---
+- name: Configuring pagespeed with Nginx
+  hosts: linode
+  become: yes
+  vars:
+      nginx_stable: 1.22.0
+      pagespeed_dir: /usr/src/nginx/incubator-pagespeed-ngx/
+      nginx_dir: /usr/src/nginx/
+      pagespeed_cache_dir: /var/ngx_pagespeed_cache
+      nginx_mod_dir: /usr/share/nginx/
+      PSOL_BINARY_URL: https://dl.google.com/dl/page-speed/psol/1.13.35.2-x64.tar.gz
+      server_architecture: x64
+  tasks:
+     - apt: update_cache=yes
+
+     - name: Installing Required Dependencies for compilation
+       apt:
+          pkg:
+            - dpkg-dev
+            - build-essential
+            - zlib1g-dev
+            - libpcre3-dev
+            - git
+            - unzip
+            - uuid-dev
+          state: present
+
+     - name: Uncommenting Deb-Src from source.list
+       replace:
+          dest: /etc/apt/sources.list
+          replace: "deb-src"
+          regexp: "# deb-src"
+
+     - name: Installing Software Common properties
+       apt:
+          name: software-properties-common
+          state: present
+
+     - name: Adding Repo
+       apt_repository: 
+           repo: ppa:ondrej/nginx
+           update_cache: yes
+    
+     - name: Installing build dependencies for Nginx Compilation
+       apt:
+          name: nginx
+          state: build-dep
+          update_cache: yes
+      
+     - name: Installing Nginx
+       apt: 
+          name: nginx
+          state: present
+
+     - name: Make Directory for nginx
+       file: 
+           path: "{{ nginx_dir }}"
+           state: directory
+
+     - name: Installing Nginx Source Code
+       shell: wget http://nginx.org/download/nginx-{{ nginx_stable }}.tar.gz
+       args:
+           chdir: "{{ nginx_dir }}"
+       
+     - name: Unarchieve Nginx File
+       shell: tar -xzvf nginx-{{ nginx_stable }}.tar.gz
+       args:
+           chdir: "{{ nginx_dir }}"
+
+     - name: Cloning PageSpeed Module from Git
+       shell: rm -rf incubator-pagespeed-ngx &&  git clone https://github.com/apache/incubator-pagespeed-ngx.git
+       args:
+           chdir: "{{ nginx_dir }}"
+    
+     - name: Checkout to Stable Version
+       shell: git checkout latest-stable
+       args: 
+           chdir: "{{ pagespeed_dir }}"
+
+     - name: Download Page Optimization Library
+       get_url:
+           url: "{{ PSOL_BINARY_URL }}"
+           dest: "{{ pagespeed_dir }}"
+
+     - name: Unarchieve PSOL Source code
+       shell: tar -xzvf 1.13.35.2-x64.tar.gz
+       args: 
+           chdir: "{{ pagespeed_dir }}"
+
+     - name: Configure Nginx Module compilation
+       shell: ./configure --with-compat --add-dynamic-module=../incubator-pagespeed-ngx
+       args: 
+           chdir: "{{ nginx_dir }}/nginx-{{ nginx_stable }}"
+
+     - name: Compile Nginx Module 
+       shell: make modules
+       args: 
+           chdir: "{{ nginx_dir }}/nginx-{{ nginx_stable }}"
+
+     - name: Copy the module 'ngx_pagespeed.so' to the default Nginx module directory
+       shell: cp {{ nginx_dir }}/nginx-{{ nginx_stable }}/objs/ngx_pagespeed.so {{ nginx_mod_dir }}/modules
+       args:
+           chdir: "{{ nginx_dir }}/nginx-{{ nginx_stable }}"
+
+     - name: Creating a new configuration file to enable the Pagespeedd module
+       copy:
+          dest: "{{ nginx_mod_dir }}/modules-available/ngx-pagespeed.conf"
+          content: |
+              load_module modules/ngx_pagespeed.so;
+  
+     - name: Activate the Pagespeed module by creating a symlink configuration
+       shell: ln -s {{ nginx_mod_dir }}//modules-available/ngx-pagespeed.conf /etc/nginx/modules-enabled/70-ngx-pagespeed.conf
+       args:
+           chdir: "{{ nginx_dir }}/nginx-{{ nginx_stable }}"       
+
+     - name: Create PageSpeed Config File
+       template: 
+          src: ./pagespeed.conf
+          dest: /etc/nginx/
+          owner: ubuntu
+
+     - name: Make Directory for PageSpeed Cache
+       file: 
+           path: "{{ pagespeed_cache_dir}}"
+           state: directory
+           owner: www-data
+           group: www-data
+
+     - name: Add the Configuration in Sites-Enabled
+       replace:
+          dest: /etc/nginx/sites-enabled/default
+          replace: "include /etc/nginx/pagespeed.conf;"
+          regexp: "# include snippets/snakeoil.conf;"
+       notify: Restart Nginx
+
+  handlers: 
+     - name: Restart Nginx
+       service:
+           name: nginx
+           state: restarted

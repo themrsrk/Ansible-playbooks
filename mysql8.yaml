@@ -1,0 +1,68 @@
+---
+- name: Installing MySQL 8.0
+  hosts: aws
+  vars:
+    root_user: root
+    root_password: shahrukh@123
+    mysql_user: bimex
+    mysql_password: bimex@123
+    db_name: bimex
+    unix_socket: /var/run/mysqld/mysqld.sock 
+  become: true
+  tasks:
+   - apt: update_cache=yes
+
+#   - name: Downloading MySQL 8.0 Repo
+#     get_url:
+#        url: https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
+#        dest: /home/vagrant/
+
+#   - name: Installing MYSQL Repo
+#     apt:
+#       deb: /home/vagrant/mysql-apt-config_0.8.12-1_all.deb
+#       state: present
+
+   - name: Installing Mysql-Server
+     become: yes
+     apt:
+       name: mysql-server
+       state: latest 
+
+   - name: Installing pip 
+     apt:
+         name: python3-pip
+         state: present
+
+   - name: Making sure pymysql is present
+     pip:
+        name: pymysql
+        state: present
+
+   - name: Setting up MySQL root password
+     mysql_user:
+           login_host: 'localhost'
+           login_user: '{{ root_user }}'
+           login_password: "{{ root_password }}"
+           login_unix_socket: '{{ unix_socket }}'
+           name: '{{ root_user }}'
+           password: "{{ root_password }}"
+           state: present
+           priv: '*.*:ALL,GRANT'
+
+   - name: Creating a Database for bimex
+     mysql_db:
+           name: "{{ db_name }}"
+           state: present
+           login_unix_socket: '{{ unix_socket }}'
+           login_user: '{{ root_user }}'
+           login_password: "{{ root_password }}"
+         
+   - name: Setting up MySQL user & password
+     mysql_user:
+           name: '{{ mysql_user }}'
+           password: "{{ mysql_password }}"
+           host: '%'
+           login_unix_socket: '{{ unix_socket }}'
+           login_user: '{{ root_user }}'
+           login_password: "{{ root_password }}"
+           priv: "{{ db_name }}.{{ mysql_user }}:ALL,GRANT"
