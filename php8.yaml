@@ -1,0 +1,56 @@
+---
+- name: Install PHP 8.1 with Laravel and required extensions
+  hosts: aws
+  become: true
+  
+  tasks:
+  - name: Update apt cache
+    apt:
+      update_cache: yes
+  
+  - name: Install apache2
+    apt:
+      name: apache2
+      state: present
+
+  - name: Install PHP 8.1 and required extensions
+    apt:
+      name:
+        - software-properties-common
+        - language-pack-en-base
+      state: present
+    when: ansible_distribution_release == "focal"
+
+  - name: Add PHP 8.1 repository
+    apt_repository:
+      repo: ppa:ondrej/php
+    when: ansible_distribution_release == "focal"
+
+  - name: Install PHP 8.1 and required extensions
+    apt:
+      name:
+        - php8.1
+        - php8.1-cli
+        - php8.1-curl
+        - php8.1-gd
+        - php8.1-intl
+        - php8.1-fpm
+#        - php8.1-json
+        - php8.1-mbstring
+        - php8.1-mysql
+        - php8.1-xml
+        - php8.1-zip
+      state: present
+
+#  - name: Install Composer
+#    apt:
+#      name: composer
+#      state: present
+#
+#  - name: Install Laravel
+#    composer:
+#      command: create-project laravel/laravel /var/www/html/laravel
+#      global_command: yes
+#      executable: /usr/bin/composer
+#    become_user: www-data
+#    become: true

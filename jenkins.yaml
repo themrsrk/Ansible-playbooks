@@ -1,12 +1,12 @@
 - name: Installing Jenkins
-  hosts: localhost
-  connection: local
+  hosts: aws
+#  connection: local
   become: yes
   vars:
       jenkins_repo_url: https://pkg.jenkins.io/debian/jenkins.io.key 
       source_list: https://pkg.jenkins.io/debian
   tasks:  
-#    - apt: update_cache=yes
+    - apt: update_cache=yes
 
     - name: Installing JDK
       apt:
@@ -23,16 +23,16 @@
         dest: /etc/apt/sources.list.d/jenkins.list
         create: yes
         state: present
-        line: "deb {{ source_list }} binary/"
+        line: "deb [trusted=yes] {{ source_list }} binary/"
 
-#    - apt: update_cache=yes
+    - apt: update_cache=yes
 
     - name: Installing Jenkins
       apt:
         name: jenkins
         state: present
     
-    - name: Installing AWS CLI
-      apt:
-        name: awscli
-        state: present
+#    - name: Installing AWS CLI
+#      apt:
+#        name: awscli
+#        state: present

@@ -1,6 +1,6 @@
 ---
 - name: Configuring pagespeed with Nginx
-  hosts: linode
+  hosts: aws
   become: yes
   vars:
       nginx_stable: 1.22.0

@@ -3,9 +3,32 @@
   hosts: aws
   become: yes
   vars:
+#     key_server_id : 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
       mongo_version: 5.0
-
+      # 2.2
+      # 2.4
+      # 2.6
+      # 2.8
+      # 3.0
+      # 3.2
+      # 3.4
+      # 3.6
+      # 3.8
+      # 4.0
+      # 4.2
+      # 4.4
+      # 4.6
+      # 4.7
+      # 4.8
+      # 4.9
+      # 5.0
+      # 6.0
   tasks:
+
+  #  - name: Add Mongo packages repo
+  #    apt_key: 
+  #        id: "{{ key_server_id }}"  
+  #        keyserver: keyserver.ubuntu.com
 
     - name: Import public key
       apt_key:
@@ -15,20 +38,10 @@
     - name: Add repository
       apt_repository:
         filename: '/etc/apt/sources.list.d/mongodb-org-{{ mongo_version }}.list'
-        repo: 'deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/{{ mongo_version }} multiverse'
+        repo: 'deb https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/{{ mongo_version }} multiverse'
         state: present
         update_cache: yes
 
-    - name: Install Libssl1.1 Dependency
-      get_url:
-         url: http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
-         dest: /home/ubuntu/
-
-    - name: Install Debian Package
-      apt:
-         deb: libssl1.1_1.1.1f-1ubuntu2_amd64.deb
-         
-         
     - name: Install mongoDB
       apt:
         name: mongodb-org
@@ -42,4 +55,3 @@
     service:
         name: mongod
         state: started
-

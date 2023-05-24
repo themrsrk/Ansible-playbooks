@@ -1,0 +1,55 @@
+---
+- name: Install PostgreSQL and pgAdmin
+  hosts: aws
+  become: yes
+  
+  tasks:
+
+    - apt: update_cache=yes
+
+    - name: Add PostgreSQL Repository Key
+      apt_key:
+        url: 'https://www.postgresql.org/media/keys/ACCC4CF8.asc'
+        state: present
+    
+    - name: Install PostgreSQL Repository
+      apt_repository:
+        filename: '/etc/apt/sources.list.d/pgsql.list'
+#        repo: 'deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main'
+        repo: 'deb http://apt.postgresql.org/pub/repos/apt/ focal-pgdg main 13'
+        state: present
+#        update_cache: yes
+
+    - apt: update_cache=yes
+
+    - name: Install Libssl1.1 Dependency
+      get_url:
+         url: http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+         dest: /home/ubuntu/
+
+    - name: Install Debian Package
+      apt:
+         deb: libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+
+    - apt: update_cache=yes
+
+    - name: Install PostgreSQL Contrib
+      apt:
+        name: postgresql-contrib
+        state: present
+
+    - name: Install PostgreSQL Server
+      apt:
+        name: postgresql
+        state: present
+
+    - name: Install pgAdmin4
+      apt:
+        name: pgadmin4
+        state: present
+
+    - name: Start pgAdmin4
+      service:
+        name: pgadmin4
+        state: started
+        enabled: yes

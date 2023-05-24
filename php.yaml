@@ -1,16 +1,16 @@
 ---
 - name: Installing PHP Version {{ php_version }}
-  hosts: aws
+  hosts: icecat
   become: yes
   vars:
-    php_version: 7.2
+    php_version: 8.1
   tasks:
 
-   - apt: update_cache=yes
-   - name: Installing Apache2
-     apt:
-       name: apache2
-       state: latest
+  #  - apt: update_cache=yes
+  #  - name: Installing Apache2
+  #    apt:
+  #      name: apache2
+  #      state: latest
 
    - name: Installing Software Common Properties
      apt: 
@@ -64,19 +64,19 @@
          - php{{ php_version }}-phar
        state: present
 
-   - name: Enabling Apache Module for FASTCGI
-     apache2_module:
-        name: "{{ item }}"
-        state: present
-     with_items:
-          - actions
-          - alias
-          - proxy_fcgi
-          - rewrite
-     notify: Check Status of Apache2
+  #  - name: Enabling Apache Module for FASTCGI
+  #    apache2_module:
+  #       name: "{{ item }}"
+  #       state: present
+  #    with_items:
+  #         - actions
+  #         - alias
+  #         - proxy_fcgi
+  #         - rewrite
+  #    notify: Check Status of Apache2
 
-  handlers:
-   - name: Check Status of Apache2
-     service: 
-        name: apache2
-        state: restarted  
+  # handlers:
+  #  - name: Check Status of Apache2
+  #    service: 
+  #       name: apache2
+  #       state: restarted  
