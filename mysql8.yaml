@@ -1,13 +1,13 @@
 ---
 - name: Installing MySQL 8.0
   hosts: aws
-  vars:
-    root_user: root
-    root_password: shahrukh@123
-    mysql_user: wordpress
-    mysql_password: wordpress@123
-    db_name: bimex
-    unix_socket: /var/run/mysqld/mysqld.sock 
+  # vars:
+#    root_user: root
+#    root_password: shahrukh@123
+#    mysql_user: wordpress
+#    mysql_password: wordpress@123
+#    db_name: bimex
+#    unix_socket: /var/run/mysqld/mysqld.sock 
   become: true
   tasks:
    - apt: update_cache=yes
@@ -23,7 +23,7 @@
 #       state: present
 
    - name: Installing Mysql-Server
-     become: yes
+     become: true
      apt:
        name: mysql-server
        state: latest 
@@ -38,24 +38,24 @@
         name: pymysql
         state: present
 
-   - name: Setting up MySQL root password
-     mysql_user:
-           login_host: 'localhost'
-           login_user: '{{ root_user }}'
-           login_password: "{{ root_password }}"
-           login_unix_socket: '{{ unix_socket }}'
-           name: '{{ root_user }}'
-           password: "{{ root_password }}"
-           state: present
-           priv: '*.*:ALL,GRANT'
-
-   - name: Creating a Database for bimex
-     mysql_db:
-           name: "{{ db_name }}"
-           state: present
-           login_unix_socket: '{{ unix_socket }}'
-           login_user: '{{ root_user }}'
-           login_password: "{{ root_password }}"
+#   - name: Setting up MySQL root password
+#     mysql_user:
+#           login_host: 'localhost'
+#           login_user: '{{ root_user }}'
+#           login_password: "{{ root_password }}"
+#           login_unix_socket: '{{ unix_socket }}'
+#           name: '{{ root_user }}'
+#           password: "{{ root_password }}"
+#           state: present
+#           priv: '*.*:ALL,GRANT'
+#
+#   - name: Creating a Database for bimex
+#     mysql_db:
+#           name: "{{ db_name }}"
+#           state: present
+#           login_unix_socket: '{{ unix_socket }}'
+#           login_user: '{{ root_user }}'
+#           login_password: "{{ root_password }}"
          
    - name: Setting up MySQL user & password
      mysql_user:

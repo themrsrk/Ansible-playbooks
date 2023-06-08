@@ -1,7 +1,7 @@
 ---
 - name: Configuring pagespeed with Nginx
   hosts: aws
-  become: yes
+  become: true
   vars:
       nginx_stable: 1.22.0
       pagespeed_dir: /usr/src/nginx/incubator-pagespeed-ngx/

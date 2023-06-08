@@ -1,9 +1,10 @@
 ---
 - name: Installing NodeJS with NVM
-  hosts: aws
-  become: false
+  remote_user: bow-dev
+  hosts: bow
+  become: true
   vars:
-     version: 16.14.0
+     version: 18
   tasks:
 
     - name: Configuring NVM in a System

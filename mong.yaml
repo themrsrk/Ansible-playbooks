@@ -1,7 +1,7 @@
 ---
 - name: Installing MongoDB
   hosts: aws
-  become: yes
+  become: true
   vars:
 #     key_server_id : 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
       mongo_version: 5.0

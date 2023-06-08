@@ -1,0 +1,41 @@
+- name: Docker & Docker Compose Installation
+  hosts: bow
+  become: true
+  tasks:
+  - apt: update_cache=yes
+
+  - name: Install packages to allow apt to use repository
+    apt:
+       pkg:
+        - ca-certificates
+        - curl
+        - gnupg
+
+  - name: Install Docker official GPG Key
+    shell: install -m 0755 -d /etc/apt/keyrings
+
+  - name: Install Docker official GPG Key
+    shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+  - name: Changing Permission of GPG keys 
+    file: 
+       path: /etc/apt/keyrings/docker.gpg
+       mode: a+r
+
+  - name: Setup the repository
+    shell: echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+  - apt: update_cache=yes
+
+  - name: Installing Docker Engine
+    apt:
+       pkg:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        - docker-buildx-plugin
+        - docker-compose-plugin
+
+    
+
+    
