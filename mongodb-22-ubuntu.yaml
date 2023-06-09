@@ -24,7 +24,9 @@
       apt:
         name: libssl1.1
         state: present
-
+        
+    - apt: update_cache=yes
+    
     - name: Install MongoDB
       apt:
         name: mongodb-org
