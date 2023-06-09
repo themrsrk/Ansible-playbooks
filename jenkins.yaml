@@ -17,10 +17,10 @@
         name: openjdk-11-jdk
         state: present
 
-    - name: Installing Jenkins Repo Key
-      apt_key:
-        url: '{{ jenkins_repo_url }}'
-        state: present
+#     - name: Installing Jenkins Repo Key
+#       apt_key:
+#         url: '{{ jenkins_repo_url }}'
+#         state: present
     
     - name: Source list update
       lineinfile:
