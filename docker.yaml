@@ -1,5 +1,5 @@
 - name: Docker & Docker Compose Installation
-  hosts: bow
+  hosts: all
   become: true
   tasks:
   - apt: update_cache=yes
