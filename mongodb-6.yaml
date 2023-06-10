@@ -1,8 +1,10 @@
 - name: Installation og MongoDB
   hosts: aws
   become: true
+  vars:
+    os_variety: jammy
+    mongo_version: 6.0
   tasks:
-
     - apt: update_cache=yes
 
     - name: Install required packages
@@ -14,19 +16,27 @@
           - lsb-release
           - ca-certificates
 
-    - name: add MongoDB public GPG key
-      apt_key: id=2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5  keyserver=keyserver.ubuntu.com
-    
+    - name: Import public key
+      apt_key:
+        url: 'https://www.mongodb.org/static/pgp/server-{{ mongo_version }}.asc'
+        state: present      
+
+    - apt: update_cache=yes
+
+    # - name: Adding MongoDB public GPG key
+    #   shell: apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+    #   when: ansible_facts['lsb']['release'] == "22.04"
+
     - apt: update_cache=yes
 
     - name: Creating a repo file
       file:
          path: /etc/apt/sources.list.d/mongodb-org-6.0.list
-         state: touch
+         state: touch   
 
     - name: Add MongoDB repository
       lineinfile: >
-         line="deb https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse"
+         line="deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu {{os_variety}}/mongodb-org/6.0 multiverse"
          dest=/etc/apt/sources.list.d/mongodb-org-6.0.list
          state=present
 
@@ -40,6 +50,7 @@
         allow_unauthenticated: yes
       notify: 
         - start mongodb
+
   handlers:
     - name: start mongodb
       service: name=mongod state=started
