@@ -1,0 +1,56 @@
+- name: Installation og MongoDB
+  hosts: aws
+  become: true
+  tasks:
+
+    - apt: update_cache=yes
+
+    - name: Install required packages
+      apt:
+        pkg: 
+          - gnupg2
+          - software-properties-common
+          - apt-transport-https
+          - lsb-release
+          - ca-certificates
+
+    # - name: Importing MongoDB public GPG keys
+    #   shell: curl -fsSL https://www.mongodb.org/static/pgp/server-6.0.asc|sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/mongodb-6.gpg
+    - name: add MongoDB public GPG key
+      apt_key: id=2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5  keyserver=keyserver.ubuntu.com
+    
+    - apt: update_cache=yes
+
+    - name: Creating a repo file
+      file:
+         path: /etc/apt/sources.list.d/mongodb-org-6.0.list
+         state: touch
+
+    - name: Add MongoDB repository
+      lineinfile: >
+         line="deb https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse"
+         dest=/etc/apt/sources.list.d/mongodb-org-6.0.list
+         state=present
+
+
+    # - name: Add MongoDB repository
+    #   apt_repository:
+    #     repo: deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/6.0 multiverse
+    #     filename: /etc/apt/sources.list.d/mongodb-org-6.0.list
+    #     state: present
+    #     update_cache: true
+
+    - apt: update_cache=yes
+
+    - name: Install MongoDB
+      apt:
+        name: mongodb-org
+        state: present
+        update_cache: yes
+        allow_unauthenticated: yes
+      notify: 
+        - start mongodb
+  handlers:
+    - name: start mongodb
+      service: name=mongod state=started
+
