@@ -1,7 +1,7 @@
 ---
 - name: Installing PHP Version {{ php_version }}
   hosts: icecat
-  become: yes
+  become: true
   vars:
     php_version: 8.1
   tasks:

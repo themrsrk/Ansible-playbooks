@@ -1,8 +1,9 @@
 ---
 - name: Install PostgreSQL and pgAdmin
   hosts: aws
-  become: yes
-  
+  become: true
+  vars:
+     os_variety: jammy
   tasks:
 
     - apt: update_cache=yes
@@ -15,11 +16,9 @@
     - name: Install PostgreSQL Repository
       apt_repository:
         filename: '/etc/apt/sources.list.d/pgsql.list'
-#        repo: 'deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main'
-        repo: 'deb http://apt.postgresql.org/pub/repos/apt/ focal-pgdg main 13'
+        repo: 'deb http://apt.postgresql.org/pub/repos/apt/ {{os_variety}}-pgdg main 13'
         state: present
-#        update_cache: yes
-
+        
     - apt: update_cache=yes
 
     - name: Install Libssl1.1 Dependency
@@ -43,13 +42,3 @@
         name: postgresql
         state: present
 
-    - name: Install pgAdmin4
-      apt:
-        name: pgadmin4
-        state: present
-
-    - name: Start pgAdmin4
-      service:
-        name: pgadmin4
-        state: started
-        enabled: yes
